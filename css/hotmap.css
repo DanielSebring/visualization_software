@@ -1,0 +1,14 @@
+rect {
+	stroke:#E6E6E6;
+	stroke-width: 2px;
+}
+
+text {
+	font-size: 9pt;
+	font-family: Consolas, courier;
+	fill: #aaa;
+}
+
+text.axis {
+	fill: #000;	
+}
