@@ -60,11 +60,10 @@ window.HotMap = (function() {
 			var dateCol = this.dateColumn;
 			var startSub = this.sub1;
 			var endSub = this.sub2;
-			var formatD = d3.time.format(dateString);
+			data.format = d3.time.format(dateString);
 			for (var i = 0; i < data.objects.length; i++) {
-				dateFormatted = new Date(data.objects[i][dateCol].substring(startSub, endSub));
+				var dateFormatted = new Date(data.objects[i][dateCol].substring(startSub, endSub));
 				data.objects[i][dateCol] = dateFormatted;
-				console.log(data.objects[i][dateCol]);
 			}
 			return this;
 		}
@@ -79,6 +78,16 @@ window.HotMap = (function() {
 				+ "H" + w1 * data.cellSize + "V" + (d1 + 1) * data.cellSize
 				+ "H" + (w1 + 1) * data.cellSize + "V" + 0
 				+ "H" + (w0 + 1) * data.cellSize + "Z";
+		}
+		
+		function returnValues(stringMonth, stringDate) {
+			for (var i = 0; i < data.nestedData.length; i++) {
+				if (data.nestedData[i].key == (stringMonth + " " + stringDate)) {
+					console.log((stringMonth + " " + stringDate) + " has a value of " + data.nestedData[i].values.length)
+					//console.log(color(data.nestedData[i].values.length));
+					return data.nestedData[i].values.length;
+				}
+			}
 		}
 		
 		
@@ -118,8 +127,7 @@ window.HotMap = (function() {
 			var rect = svg.selectAll(".day")
 						.data(function(d) { 
 							
-							//console.log(d3.time.days(new Date(d , 0 , 1), new Date (d + 1, 0, 1)));
-							
+							console.log(d3.time.days(new Date(d , 0 , 1), new Date (d + 1, 0, 1)));
 							return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
 						.enter().append("rect")
 						.attr("class", "day")
@@ -151,7 +159,7 @@ window.HotMap = (function() {
 			console.log("Testing 293530 " , data.nestedData);
 			for (var i = 0; i < data.nestedData.length; i++) {
 				if (data.nestedData[i]["values"].length > data.dayMax) {
-					console.log("max updated!");
+					//console.log("max updated!");
 					data.dayMax = data.nestedData[i]["values"].length;
 				}
 				
@@ -161,40 +169,33 @@ window.HotMap = (function() {
 			var color = d3.scale.linear().range(["white", '#002b53'])
 							.domain([0, data.dayMax])
 							
-			console.log(color);
 			rect.filter(function(d) {
-				console.log("1231533 " + d);
+				console.log("before filtering, d is " + d);
 				var testMonth = d.substring(5,7);
 				var testDate = d.substring(8,10);
-				console.log(testMonth);
-				console.log(testDate);
-				if (testMonth.substring(0, 1) == "0") {
-					testMonth = testMonth.substring(1);
-				}
-				if (testDate.substring(0, 1) == "0") {
-					testDate = testDate.substring(1);
-				}
 				for (var i = 0; i < data.nestedData.length; i++) {	
-				console.log("testMonth " + testMonth);
-				console.log("testDate " + testMonth);	
 					var monthDay = data.nestedData[i]["key"].split(" ");
-				console.log("monthDay " + monthDay);
-					if (monthDay[0] == testMonth && monthDay[1] == testDate) {
-						console.log( "132132 exists");
+					if ((monthDay[0] == testMonth) && (monthDay[1] == testDate)) {
 						return true;
 					}
 				}
-				console.log("doesn't exist");
 				return false;
-			})
+			}).select("title").text(function(d) {return d + "HAHAHAHAHAAHAH"})
 				//return dates in data.nestedData.key })
-				.attr("fill", function(d) { 
-					console.log("printing");
-					console.log(Date(d));
-					console.log("1387642 color: ", color(data.nestedData[Date(d).getMonth()][Date(d).getDate()])());
-					return color(data.nestedData[d]); })
-				.select("title")
-				.text(function(d) { return d + ": " + percent(data.nestedData[d]); })
+				.style("fill", function(d) { 
+					console.log("after filtering, d is" + d);
+					var year = parseInt(d.substring(0,4));
+					var month =  parseInt(d.substring(5,7)) - 1;
+					var day = parseInt(d.substring(8,10));
+					//var asDate = new Date(d.substring(0,4), parseInt(d.substring(5,7)) - 1, d.substring(8,10));
+					var value = returnValues(month, day);
+					console.log("value was " + value);
+					console.log(color(value));
+					return color(value)
+					
+				})
+				//.select("title")
+				//.text(function(d) { return d + ": " + percent(data.nestedData[d]); })
 			}
 		return data;
 	}
