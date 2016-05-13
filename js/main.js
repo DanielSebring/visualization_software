@@ -5,10 +5,11 @@
 	heatmap.changeName("Heatmap!");
 	d3.csv("./../data/Airplane_Crashes_and_Fatalities_Since_1908.csv", function(error, newData) {
 				heatmap.process(newData);
+				heatmap.setColor("purple");
 				heatmap.getData();
 				heatmap.setDateColumn("Date");
 				heatmap.substrings(0, 10);
-				heatmap.formatDate("%m/%d/%Y");
+				heatmap.formatData("%m/%d/%Y");
 				heatmap.draw();
 				
 			});

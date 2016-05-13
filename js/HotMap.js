@@ -1,18 +1,22 @@
 window.HotMap = (function() {
 	var map = function(stringName) {
 		var data = {};
+		data.formattedMap = new Object();
+		console.log(Object.keys(data.formattedMap).length)
 		data.title = stringName;
 		data.objects = [];
+		data.color = "purple";
 		data.dateColumn;
-		data.dateSub1;
-		data.dateSub2;
-		data.timeSub1;
-		data.timeSub2;
+		data.sub1;
+		data.sub2;
 		data.dayMax = -Infinity;
 		data.dayMin = Infinity;
-		data.nestedData = [];
 		data.cellSize = 17;
-									
+		data.months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+		
+		////////////////////////////
+		//// external functions ////
+		////////////////////////////
 		
 		data.changeName = function(newName) {
 			this.title = newName;
@@ -25,7 +29,6 @@ window.HotMap = (function() {
 		
 		data.getData = function() {
 			return this.objects;
-			
 		}
 		
 		data.dateColumn = function(dateName) {
@@ -56,19 +59,56 @@ window.HotMap = (function() {
 			return this;
 		}
 		
-		data.formatDate = function(dateString) {
+		data.setColor = function(stringColor) {
+			this.color = stringColor;
+			return this;
+		}
+		
+		data.formatData = function(dateString) {
 			var dateCol = this.dateColumn;
 			var startSub = this.sub1;
 			var endSub = this.sub2;
 			data.format = d3.time.format(dateString);
 			for (var i = 0; i < data.objects.length; i++) {
+				console.log("12614t13 " + data.objects[i][dateCol].substring(startSub, endSub))
 				var dateFormatted = new Date(data.objects[i][dateCol].substring(startSub, endSub));
+				var month = dateFormatted.getMonth();
+				var day = dateFormatted.getDate();
+				console.log("dateFormatted " + dateFormatted);
+				console.log("month " + month + " day " + day);
+				var dataString = "";
+				dataString =  month + " " + day;
+				console.log("Date string " + dataString);
+				if (data.formattedMap[dataString] == undefined) {
+					console.log("creating dateString in map for " + dataString)
+					console.log(data.formattedMap[dataString]);
+					data.formattedMap[dataString] = 1;
+					console.log(data.formattedMap[dataString]);
+				} else {
+					console.log("updating dateString in map for " + dataString + " to " + data.formattedMap[dataString] + 1)
+					console.log(data.formattedMap[dataString]);
+					var newSize = data.formattedMap[dataString] + 1;
+					if(newSize > data.dayMax) {
+						data.dayMax = newSize;
+					}
+					data.formattedMap[dataString] = data.formattedMap[dataString] + 1;
+				}
 				data.objects[i][dateCol] = dateFormatted;
 			}
+			console.log("123123!@asd" + Object.keys(data.formattedMap));
+			console.log("198174183223 ", data.formattedMap);
+			console.log(data.objects);
 			return this;
 		}
 		
 		
+		
+		////////////////////////////
+		//// internal functions ////
+		////////////////////////////
+		
+		/* this function borrowed from Mike Bostock's Block 4063318
+		** from https://bl.ocks.org/mbostock/4063318             */
 		function monthPath(t0) {
 			var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
 				d0 = t0.getDay(), w0 = d3.time.weekOfYear(t0),
@@ -84,14 +124,27 @@ window.HotMap = (function() {
 			for (var i = 0; i < data.nestedData.length; i++) {
 				if (data.nestedData[i].key == (stringMonth + " " + stringDate)) {
 					console.log((stringMonth + " " + stringDate) + " has a value of " + data.nestedData[i].values.length)
-					//console.log(color(data.nestedData[i].values.length));
 					return data.nestedData[i].values.length;
 				}
 			}
 		}
 		
+		function get(key) {
+			return map[key];
+		}
+		
+
+		////////////////////////////
+		////         THE        ////
+		//// beast that is draw ////
+		////////////////////////////
+		
 		
 		data.draw = function() {
+				if (Object.keys(data.formattedMap).length == 0)  {
+					console.log("Something's wrong!  There's a couple options of what that is:  you might not have formatted your data set in which case you would need to run .process() but if you've already called that and it didn't work you might not be passing the right measure string as a parameter.  Or your data just sucks.  ");
+				}
+				
 				
 		var margin =  {
 				left: 70,
@@ -103,12 +156,13 @@ window.HotMap = (function() {
 		var height = 600 - margin.bottom - margin.top;
 		var width = 1000 - margin.left - margin.right;
 		
-		var cellSize = 17;
+		var cellSize = 25;
 		
 		var percent = d3.format(".1%"),
 			format = d3.time.format("%Y-%m-%d");
 		
-
+		var color = d3.scale.linear().range(["white", data.color])
+					  .domain([0, data.dayMax])
 
 		var svg = d3.select("body").selectAll("svg")
 					.data(d3.range(1900, 1901))
@@ -126,8 +180,6 @@ window.HotMap = (function() {
 			
 			var rect = svg.selectAll(".day")
 						.data(function(d) { 
-							
-							console.log(d3.time.days(new Date(d , 0 , 1), new Date (d + 1, 0, 1)));
 							return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
 						.enter().append("rect")
 						.attr("class", "day")
@@ -142,60 +194,24 @@ window.HotMap = (function() {
 			
 			svg.selectAll(".month")
 				.data(function(d) {
-					//console.log("months ", d3.time.months(new Date(d, 0, 1), new Date(d +1, 0, 1)) );
+					//
 					return d3.time.months(new Date(d, 0, 1), new Date(d +1, 0, 1)); })
 				.enter().append("path")
 				.attr("class", "month")
 				.attr("d", monthPath);
-			
-			
-			var dayMax = -Infinity;
-			var dayMin = Infinity;
-			data.nestedData = d3.nest()
-				.key(function(d) {					
-					return d[data.dateColumn].getMonth() + " " +  d[data.dateColumn].getDate();
-					})
-				.entries(data.objects);
-			console.log("Testing 293530 " , data.nestedData);
-			for (var i = 0; i < data.nestedData.length; i++) {
-				if (data.nestedData[i]["values"].length > data.dayMax) {
-					//console.log("max updated!");
-					data.dayMax = data.nestedData[i]["values"].length;
-				}
-				
-			}
-			console.log(data.dayMax);
-			
-			var color = d3.scale.linear().range(["white", '#002b53'])
-							.domain([0, data.dayMax])
+
+
 							
-			rect.filter(function(d) {
-				console.log("before filtering, d is " + d);
-				var testMonth = d.substring(5,7);
-				var testDate = d.substring(8,10);
-				for (var i = 0; i < data.nestedData.length; i++) {	
-					var monthDay = data.nestedData[i]["key"].split(" ");
-					if ((monthDay[0] == testMonth) && (monthDay[1] == testDate)) {
-						return true;
-					}
-				}
-				return false;
-			}).select("title").text(function(d) {return d + "HAHAHAHAHAAHAH"})
-				//return dates in data.nestedData.key })
-				.style("fill", function(d) { 
+			rect.style("fill", function(d) { 
 					console.log("after filtering, d is" + d);
-					var year = parseInt(d.substring(0,4));
 					var month =  parseInt(d.substring(5,7)) - 1;
 					var day = parseInt(d.substring(8,10));
-					//var asDate = new Date(d.substring(0,4), parseInt(d.substring(5,7)) - 1, d.substring(8,10));
-					var value = returnValues(month, day);
-					console.log("value was " + value);
-					console.log(color(value));
-					return color(value)
-					
+					var val = data.formattedMap[month + " " + day];
+					console.log("value was " + val);
+					console.log(color(val));
+					return color(val)
 				})
-				//.select("title")
-				//.text(function(d) { return d + ": " + percent(data.nestedData[d]); })
+				.select("title").text(function(d) {return d + "HAHAHAHAHAAHAH"})
 			}
 		return data;
 	}
