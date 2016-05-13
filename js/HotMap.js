@@ -64,11 +64,14 @@ window.HotMap = (function() {
 			return this;
 		}
 		
+		
 		data.formatData = function(dateString) {
 			var dateCol = this.dateColumn;
 			var startSub = this.sub1;
 			var endSub = this.sub2;
 			data.format = d3.time.format(dateString);
+			console.log(data.objects);
+			console.log("12142314 about to process");
 			for (var i = 0; i < data.objects.length; i++) {
 				console.log("12614t13 " + data.objects[i][dateCol].substring(startSub, endSub))
 				var dateFormatted = new Date(data.objects[i][dateCol].substring(startSub, endSub));
@@ -133,6 +136,16 @@ window.HotMap = (function() {
 			return map[key];
 		}
 		
+		function returnShortDate(dateString) {
+			console.log("1231231313 " + dateString);
+			var month = dateString.getMonth();
+			var day = dateString.getDate();
+			//var month =  parseInt(d.substring(5,7)) - 1;
+			//var day = parseInt(d.substring(8,10));
+			var val = data.formattedMap[month + " " + day];
+			return val;
+		}
+		
 
 		////////////////////////////
 		////         THE        ////
@@ -153,10 +166,10 @@ window.HotMap = (function() {
 				right: 50
 			};
 			
-		var height = 600 - margin.bottom - margin.top;
+		var height = 300 - margin.bottom - margin.top;
 		var width = 1000 - margin.left - margin.right;
 		
-		var cellSize = 25;
+		var cellSize = 17;
 		
 		var percent = d3.format(".1%"),
 			format = d3.time.format("%Y-%m-%d");
@@ -164,7 +177,7 @@ window.HotMap = (function() {
 		var color = d3.scale.linear().range(["white", data.color])
 					  .domain([0, data.dayMax])
 
-		var svg = d3.select("body").selectAll("svg")
+		var svg = d3.select("#vis").selectAll("svg")
 					.data(d3.range(1900, 1901))
 					.enter().append("svg")
 					.attr("width", width)
@@ -189,8 +202,24 @@ window.HotMap = (function() {
 						.attr("y", function(d) { return d.getDay() * cellSize; })
 						.datum(format);
 						
+			var legend = svg.selectAll(".legend")
+			.data(data.months)
+			.enter().append("g")
+			.attr("class", "legend")
+			.attr("transform", function(d, i) { 
+				return "translate(" + (((i+1) * 50)+8) + ",0)"; });
+			
+			console.log("1iqugwebakh4g3ra");
+				
+			legend.append("text")
+					.attr("class", function(d, i) { return data.months[i] })
 			rect.append("title")
-			.text(function(d) {return d; });
+			.style("text-anchor", "end")
+			.attr("dy", "-.25em")
+			.text(function(d, i) {
+				console.log(d);
+				console.log(i);
+				return data.month[i]})
 			
 			svg.selectAll(".month")
 				.data(function(d) {
@@ -211,8 +240,18 @@ window.HotMap = (function() {
 					console.log(color(val));
 					return color(val)
 				})
-				.select("title").text(function(d) {return d + "HAHAHAHAHAAHAH"})
-			}
+				.select("title").text(function(d) {
+					console.log
+					var month =  parseInt(d.substring(5,7)) - 1;
+					var day = parseInt(d.substring(8,10));
+					var val = data.formattedMap[month + " " + day];
+					console.log("23132dassne1231 " + val);
+					return  month + " " + day + " # of data points: " + val})
+				
+			}	
+
+				
+				
 		return data;
 	}
 	

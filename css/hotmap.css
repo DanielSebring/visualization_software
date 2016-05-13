@@ -13,3 +13,11 @@ body {
   stroke: #000;
   stroke-width: 2px;
 }
+
+.center {
+  margin-left: auto;
+  margin-right: auto;
+  width: 800px;
+  text-align: center;
+  top:38%;
+}
