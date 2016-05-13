@@ -2,7 +2,6 @@ window.HotMap = (function() {
 	var map = function(stringName) {
 		var data = {};
 		data.formattedMap = new Object();
-		console.log(Object.keys(data.formattedMap).length)
 		data.title = stringName;
 		data.objects = [];
 		data.color = "purple";
@@ -49,13 +48,11 @@ window.HotMap = (function() {
 		data.substrings = function(num1, num2) {
 			this.sub1 = num1;
 			this.sub2 = num2;
-			console.log(this.sub2 + " was sub2 and this is sub1 " + this.sub1);
 			return this;
 		}
 		
 		data.setDateColumn = function(dateColumn) {
 			this.dateColumn = dateColumn;
-			console.log("date column name is " + this.dateColumn);
 			return this;
 		}
 		
@@ -70,26 +67,16 @@ window.HotMap = (function() {
 			var startSub = this.sub1;
 			var endSub = this.sub2;
 			data.format = d3.time.format(dateString);
-			console.log(data.objects);
-			console.log("12142314 about to process");
 			for (var i = 0; i < data.objects.length; i++) {
-				console.log("12614t13 " + data.objects[i][dateCol].substring(startSub, endSub))
+				
 				var dateFormatted = new Date(data.objects[i][dateCol].substring(startSub, endSub));
 				var month = dateFormatted.getMonth();
 				var day = dateFormatted.getDate();
-				console.log("dateFormatted " + dateFormatted);
-				console.log("month " + month + " day " + day);
 				var dataString = "";
 				dataString =  month + " " + day;
-				console.log("Date string " + dataString);
 				if (data.formattedMap[dataString] == undefined) {
-					console.log("creating dateString in map for " + dataString)
-					console.log(data.formattedMap[dataString]);
 					data.formattedMap[dataString] = 1;
-					console.log(data.formattedMap[dataString]);
 				} else {
-					console.log("updating dateString in map for " + dataString + " to " + data.formattedMap[dataString] + 1)
-					console.log(data.formattedMap[dataString]);
 					var newSize = data.formattedMap[dataString] + 1;
 					if(newSize > data.dayMax) {
 						data.dayMax = newSize;
@@ -98,9 +85,6 @@ window.HotMap = (function() {
 				}
 				data.objects[i][dateCol] = dateFormatted;
 			}
-			console.log("123123!@asd" + Object.keys(data.formattedMap));
-			console.log("198174183223 ", data.formattedMap);
-			console.log(data.objects);
 			return this;
 		}
 		
@@ -126,7 +110,6 @@ window.HotMap = (function() {
 		function returnValues(stringMonth, stringDate) {
 			for (var i = 0; i < data.nestedData.length; i++) {
 				if (data.nestedData[i].key == (stringMonth + " " + stringDate)) {
-					console.log((stringMonth + " " + stringDate) + " has a value of " + data.nestedData[i].values.length)
 					return data.nestedData[i].values.length;
 				}
 			}
@@ -137,7 +120,6 @@ window.HotMap = (function() {
 		}
 		
 		function returnShortDate(dateString) {
-			console.log("1231231313 " + dateString);
 			var month = dateString.getMonth();
 			var day = dateString.getDate();
 			//var month =  parseInt(d.substring(5,7)) - 1;
@@ -171,8 +153,7 @@ window.HotMap = (function() {
 		
 		var cellSize = 17;
 		
-		var percent = d3.format(".1%"),
-			format = d3.time.format("%Y-%m-%d");
+		var format = d3.time.format("%Y-%m-%d");
 		
 		var color = d3.scale.linear().range(["white", data.color])
 					  .domain([0, data.dayMax])
@@ -184,7 +165,7 @@ window.HotMap = (function() {
 					.attr("height", height)
 					.attr("class", "svg")
 					.append("g")
-					.attr("tansform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")")
+					.attr("transform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")")
 					
 		svg.append("text")
 			.attr("transform", "translate(-6," + cellSize * 3.5 + ")rotate(-90)")
@@ -209,18 +190,18 @@ window.HotMap = (function() {
 			.attr("transform", function(d, i) { 
 				return "translate(" + (((i+1) * 50)+8) + ",0)"; });
 			
-			console.log("1iqugwebakh4g3ra");
-				
 			legend.append("text")
 					.attr("class", function(d, i) { return data.months[i] })
-			rect.append("title")
-			.style("text-anchor", "end")
-			.attr("dy", "-.25em")
-			.text(function(d, i) {
-				console.log(d);
-				console.log(i);
-				return data.month[i]})
+                    .text(function(d, i) { return data.months[i] })
+                    .style("text-anchor", "end")
+                    .attr("dy", "-.25em")
+                    .attr("transform", function(d, i) { return "translate(" + cellSize*(i*1.5) + " ,0)"});
 			
+            
+            rect.append("title")
+			.style("text-anchor", "end")
+			.attr("dy", "-.75em")
+			.text(function(d, i) { return data.months[i] })
 			svg.selectAll(".month")
 				.data(function(d) {
 					//
@@ -232,26 +213,26 @@ window.HotMap = (function() {
 
 							
 			rect.style("fill", function(d) { 
-					console.log("after filtering, d is" + d);
 					var month =  parseInt(d.substring(5,7)) - 1;
 					var day = parseInt(d.substring(8,10));
 					var val = data.formattedMap[month + " " + day];
-					console.log("value was " + val);
-					console.log(color(val));
 					return color(val)
 				})
 				.select("title").text(function(d) {
-					console.log
 					var month =  parseInt(d.substring(5,7)) - 1;
 					var day = parseInt(d.substring(8,10));
 					var val = data.formattedMap[month + " " + day];
-					console.log("23132dassne1231 " + val);
-					return  month + " " + day + " # of data points: " + val})
-				
-			}	
-
-				
-				
+					return day + ": # of data points: " + val})
+                    
+            
+            var toolRects = document.getElementsByClassName("rect");
+            for (var i = 0; i < toolRects.length; i++) {
+                toolRects[i].tooltip({
+                    'container': 'body',
+                    'placement': 'top'
+                })
+                }
+			}		
 		return data;
 	}
 	

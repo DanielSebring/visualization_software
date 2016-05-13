@@ -1,6 +1,7 @@
 body {
   font: 10px sans-serif;
   shape-rendering: crispEdges;
+  background-color: #BDA0CB;
 }
 
 .day {
@@ -12,6 +13,11 @@ body {
   fill: none;
   stroke: #000;
   stroke-width: 2px;
+}
+
+.legend {
+    color: #000;
+    font: 10px sans-serif;
 }
 
 .center {

@@ -7,7 +7,7 @@
 				console.log(newData);
 				heatmap.process(newData);
 				heatmap.setColor("green");
-				heatmap.getData();
+				//heatmap.getData();
 				// heatmap for planes heatmap.setDateColumn("time");
 				// for all_month.csv heatmap.setDateColumn("time");
 				heatmap.setDateColumn("date");
