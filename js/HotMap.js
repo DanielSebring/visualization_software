@@ -64,12 +64,11 @@ window.HotMap = (function() {
 		
 		data.formatData = function(dateString) {
 			var dateCol = this.dateColumn;
-			var startSub = this.sub1;
-			var endSub = this.sub2;
 			data.format = d3.time.format(dateString);
 			for (var i = 0; i < data.objects.length; i++) {
-				
-				var dateFormatted = new Date(data.objects[i][dateCol].substring(startSub, endSub));
+				console.log(data.objects);
+				console.log(i);
+				var dateFormatted = new Date(data.objects[i][dateCol].substring(this.sub1, this.sub2));
 				var month = dateFormatted.getMonth();
 				var day = dateFormatted.getDate();
 				var dataString = "";
@@ -143,13 +142,13 @@ window.HotMap = (function() {
 				
 		var margin =  {
 				left: 70,
-				bottom: 100,
+				bottom: 10,
 				top: 50,
 				right: 50
 			};
 			
-		var height = 300 - margin.bottom - margin.top;
-		var width = 1000 - margin.left - margin.right;
+		var height = 200 - margin.bottom - margin.top;
+		var width = 1200 - margin.left - margin.right;
 		
 		var cellSize = 17;
 		
@@ -157,7 +156,7 @@ window.HotMap = (function() {
 		
 		var color = d3.scale.linear().range(["white", data.color])
 					  .domain([0, data.dayMax])
-
+					  
 		var svg = d3.select("#vis").selectAll("svg")
 					.data(d3.range(1900, 1901))
 					.enter().append("svg")
@@ -165,12 +164,15 @@ window.HotMap = (function() {
 					.attr("height", height)
 					.attr("class", "svg")
 					.append("g")
-					.attr("transform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")")
-					
+					.attr("transform", "translate(" + ((width - cellSize * 52) / 2 - 75) + "," + (height - cellSize * 7 - 1) + ")")			
+	
+		var tooltip = d3.select("body").append("div")	
+					.attr("class", "tooltip")				
+					.style("opacity", 0)	
+		
 		svg.append("text")
 			.attr("transform", "translate(-6," + cellSize * 3.5 + ")rotate(-90)")
 			.style("text-anchor", "middle")
-			.text(function(d) {return d;});
 			
 			var rect = svg.selectAll(".day")
 						.data(function(d) { 
@@ -181,6 +183,23 @@ window.HotMap = (function() {
 						.attr("height", cellSize)
 						.attr("x", function(d) { return d3.time.weekOfYear(d) * cellSize; })
 						.attr("y", function(d) { return d.getDay() * cellSize; })
+						.on('mouseover', function(d){
+							var month =  parseInt(d.substring(5,7)) - 1;
+							var day = parseInt(d.substring(8,10));
+							var val = data.formattedMap[month + " " + day];
+							console.log(d);
+							tooltip.transition()		
+								.duration(200)		
+								.style("opacity", .9);		
+							tooltip.html(data.months[month] + " " + day + ": " + val)	
+								.style("left", (d3.event.pageX) + "px")		
+								.style("top", (d3.event.pageY - 28) + "px");	
+							})					
+						.on("mouseout", function(d) {		
+							tooltip.transition()		
+								.duration(500)		
+								.style("opacity", 0);	
+				})
 						.datum(format);
 						
 			var legend = svg.selectAll(".legend")
@@ -204,13 +223,12 @@ window.HotMap = (function() {
 			.text(function(d, i) { return data.months[i] })
 			svg.selectAll(".month")
 				.data(function(d) {
-					//
 					return d3.time.months(new Date(d, 0, 1), new Date(d +1, 0, 1)); })
 				.enter().append("path")
 				.attr("class", "month")
 				.attr("d", monthPath);
-
-
+				
+				
 							
 			rect.style("fill", function(d) { 
 					var month =  parseInt(d.substring(5,7)) - 1;
@@ -223,23 +241,10 @@ window.HotMap = (function() {
 					var day = parseInt(d.substring(8,10));
 					var val = data.formattedMap[month + " " + day];
 					return day + ": # of data points: " + val})
-                    
+		}      
             
-            var toolRects = document.getElementsByClassName("rect");
-            for (var i = 0; i < toolRects.length; i++) {
-                toolRects[i].tooltip({
-                    'container': 'body',
-                    'placement': 'top'
-                })
-                }
-			}		
 		return data;
 	}
-	
-	
-
-
-
 	
 	return map;
 })();
